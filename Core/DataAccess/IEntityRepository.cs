@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 using Core.Entities;
+using Core.Entities.Abstract;
+using Core.Entities.Concrete;
 
 namespace Core.DataAccess
 {

@@ -1,12 +1,14 @@
-﻿namespace Core.Utilities.Results
+﻿using System;
+
+namespace Core.Utilities.Results
 {
     public class ErrorResult:Result
     {
-        public ErrorResult(string message, bool success) : base(message, false)
+        public ErrorResult(string message) : base(message, false)
         {
         }
 
-        public ErrorResult(bool success) : base(false)
+        public ErrorResult() : base(false)
         {
         }
     }

@@ -2,6 +2,10 @@
 {
     public class Result:IResult
     {
+        public Result()
+        {
+            
+        }
         public Result(string message, bool success):this(success)
         {
             Message = message;

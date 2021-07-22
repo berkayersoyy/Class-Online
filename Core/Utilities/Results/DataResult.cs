@@ -2,6 +2,10 @@
 {
     public class DataResult<T>:Result,IDataResult<T>
     {
+        public DataResult()
+        {
+            
+        }
         public DataResult(T data,bool success,string message):base(message,success)
         {
             Data = data;
