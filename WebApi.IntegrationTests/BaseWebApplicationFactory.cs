@@ -8,6 +8,6 @@ namespace WebApi.IntegrationTests
     public class BaseWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
     {
         protected override IWebHostBuilder CreateWebHostBuilder() =>
-            WebHost.CreateDefaultBuilder().UseStartup<TStartup>();
+            WebHost.CreateDefaultBuilder().UseStartup<TStartup>().UseEnvironment("Testing");
     }
 }

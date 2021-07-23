@@ -4,7 +4,6 @@ using DataAccess.Concrete.EntityFramework.Contexts;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using static WebApi.IntegrationTests.SeedData;
 
 namespace WebApi.IntegrationTests
 {
@@ -23,11 +22,11 @@ namespace WebApi.IntegrationTests
                  }
 
                  var serviceProvider =
-                     new ServiceCollection().AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
+                     new ServiceCollection().AddEntityFrameworkSqlServer().BuildServiceProvider();
 
                  services.AddDbContext<NorthwindContext>(options =>
                  {
-                     options.UseInMemoryDatabase(Guid.NewGuid().ToString());
+                     options.UseSqlServer($"Server=(localdb)\\mssqllocaldb;Database=TrainerHome_Test;Trusted_Connection=true");
                      options.UseInternalServiceProvider(serviceProvider);
                  });
 
@@ -38,11 +37,12 @@ namespace WebApi.IntegrationTests
                      var scopedServices = scope.ServiceProvider;
                      var appDb = scopedServices.GetRequiredService<NorthwindContext>();
 
+                     appDb.Database.EnsureDeleted();
                      appDb.Database.EnsureCreated();
 
                      try
                      {
-                         PopulateTestData(appDb);
+                         SeedData.PopulateTestData(appDb);
                      }
                      catch (Exception e)
                      {
