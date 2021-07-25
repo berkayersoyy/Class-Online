@@ -8,7 +8,6 @@ namespace Core.Utilities.Results
         {
             
         }
-        [JsonConstructor]
         public SuccessDataResult(T data,  string message) : base(data, true, message)
         {
         }

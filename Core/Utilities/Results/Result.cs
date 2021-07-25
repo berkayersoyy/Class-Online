@@ -1,4 +1,6 @@
-﻿namespace Core.Utilities.Results
+﻿using Newtonsoft.Json;
+
+namespace Core.Utilities.Results
 {
     public class Result:IResult
     {
@@ -6,6 +8,7 @@
         {
             
         }
+        [JsonConstructor]
         public Result(string message, bool success):this(success)
         {
             Message = message;
@@ -15,6 +18,7 @@
         {
             Success = success;
         }
+
         public bool Success { get; }
         public string Message { get; }
     }
