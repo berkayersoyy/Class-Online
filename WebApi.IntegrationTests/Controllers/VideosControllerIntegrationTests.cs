@@ -3,12 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Text;
+using Business.Abstract;
 using Core.Utilities.Results;
 using Entities.Concrete;
 using Newtonsoft.Json;
 using WebAPI;
+using WebAPI.Controllers;
 using Xunit;
 
 namespace WebApi.IntegrationTests.Controllers
@@ -22,16 +23,15 @@ namespace WebApi.IntegrationTests.Controllers
             _client = factory.CreateClient();
             _client.BaseAddress = new Uri("https://localhost/api/");
         }
-
         [Theory]
         [InlineData("videos/add")]
         public async void Add_WithValidData_ShouldReturnSuccessResult(string videoUri)
         {
-            var expectedResult = new SuccessResult("Video added.");
+            var expectedMessage = "Video added.";
             var expectedStatusCode = HttpStatusCode.OK;
             var request = new Video
             {
-                Description = "desc",
+                Description = "description which length more than 25",
                 Extension = "mp4",
                 Path = "path",
                 Title = "title"
@@ -41,33 +41,309 @@ namespace WebApi.IntegrationTests.Controllers
             var response = await _client.PostAsync(videoUri, content);
             var actualStatusCode = response.StatusCode;
             var actualResultJson = await response.Content.ReadAsStringAsync();
-            var actualResult = JsonConvert.DeserializeObject<SuccessResult>(actualResultJson);
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
 
             Assert.True(actualResult!=null);
             Assert.True(actualResult.Success);
             Assert.Equal(expectedStatusCode,actualStatusCode);
-            Assert.Equal(expectedResult.Message,actualResult.Message);
-            Assert.Equal(expectedResult.Success,actualResult.Success);
+            Assert.Equal(expectedMessage,actualResult.Message);
+        }
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithEmptyTitle_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = "desc",
+                Extension = "mp4",
+                Path = "path",
+                Title = String.Empty
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult != null);
+            Assert.True(!actualResult.Success);
+            Assert.Contains(expectedMessage, actualResult.Message);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+        }
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithNullTitle_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = "desc",
+                Extension = "mp4",
+                Path = "path",
+                Title = null
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult != null);
+            Assert.True(!actualResult.Success);
+            Assert.Contains(expectedMessage, actualResult.Message);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+        }
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithEmptyDescription_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = String.Empty,
+                Extension = "mp4",
+                Path = "path",
+                Title = "Title"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult != null);
+            Assert.True(!actualResult.Success);
+            Assert.Contains(expectedMessage, actualResult.Message);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+        }
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithNullDescription_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = null,
+                Extension = "mp4",
+                Path = "path",
+                Title = "Title"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult != null);
+            Assert.True(!actualResult.Success);
+            Assert.Contains(expectedMessage, actualResult.Message);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+        }
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithDescriptionLengthShorterThan25_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = "012345678901234567890123",
+                Extension = "mp4",
+                Path = "path",
+                Title = "Title"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult != null);
+            Assert.True(!actualResult.Success);
+            Assert.Contains(expectedMessage, actualResult.Message);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+        }
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithDescriptionLengthLongerThan250_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678999",
+                Extension = "mp4",
+                Path = "path",
+                Title = "Title"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult != null);
+            Assert.True(!actualResult.Success);
+            Assert.Contains(expectedMessage, actualResult.Message);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+        }
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithTitleLengthShorterThan5_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = "desc",
+                Extension = "mp4",
+                Path = "path",
+                Title = "Titl"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult != null);
+            Assert.True(!actualResult.Success);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Contains(expectedMessage, actualResult.Message);
         }
 
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithEmptyExtension_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = "Description which length is more than 25",
+                Extension = String.Empty,
+                Path = "path",
+                Title = "Title"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request),Encoding.UTF8,"application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult!=null);
+            Assert.True(!actualResult.Success);
+            Assert.Contains(expectedMessage, actualResult.Message);
+            Assert.Equal(expectedStatusCode,actualStatusCode);
+        }
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithNullExtension_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = "Description which length is more than 25",
+                Extension = null,
+                Path = "path",
+                Title = "Title"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult != null);
+            Assert.True(!actualResult.Success);
+            Assert.Contains(expectedMessage, actualResult.Message);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+        }
+
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithEmptyPath_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = "Description which length is more than 25",
+                Extension = "mp4",
+                Path = String.Empty,
+                Title = "Title"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request),Encoding.UTF8,"application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult!=null);
+            Assert.True(!actualResult.Success);
+            Assert.Equal(expectedStatusCode,actualStatusCode);
+            Assert.Contains(expectedMessage, actualResult.Message);
+        }
+        [Theory]
+        [InlineData("videos/add")]
+        public async void Add_WithNullPath_ShouldReturnErrorResult(string videoUri)
+        {
+            var expectedMessage = "Validation failed";
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+            var request = new Video
+            {
+                Description = "Description which length is more than 25",
+                Extension = "mp4",
+                Path = null,
+                Title = "Title"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync(videoUri, content);
+            var actualStatusCode = response.StatusCode;
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
+
+            Assert.True(actualResult != null);
+            Assert.True(!actualResult.Success);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Contains(expectedMessage, actualResult.Message);
+        }
         [Theory]
         [InlineData("videos/getall")]
         public async void GetList_WithValidData_ShouldReturnSuccessDataResultWithData(string videoUri)
         {
-            var expectedResult = new SuccessDataResult<List<Video>>();
+            //TODO Get all videos for check expected video count!
+            var expectedMessage = "All videos fetched.";
             var expectedStatusCode = HttpStatusCode.OK;
 
             var response = await _client.GetAsync(videoUri);
 
             var actualResultJson = await response.Content.ReadAsStringAsync();
-            var actualResult = JsonConvert.DeserializeObject<SuccessDataResult<List<Video>>>(actualResultJson);
+            var actualResult = JsonConvert.DeserializeObject<DataResult<List<Video>>>(actualResultJson);
             var actualStatusCode = response.StatusCode;
             
             Assert.True(actualResult!=null);
             Assert.True(actualResult.Data!=null);
             Assert.True(actualResult.Success);
+            Assert.Equal(expectedMessage,actualResult.Message);
             Assert.Equal(expectedStatusCode,actualStatusCode);
-            Assert.Equal(expectedResult.GetType(),actualResult.GetType());
             Assert.Equal(3,actualResult.Data.Count);
         }
 
@@ -75,29 +351,46 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/getbyid?videoid=1")]
         public async void Get_WithValidId_ShouldReturnSuccessDataResultWithData(string videoUri)
         {
-            var expectedResult = new SuccessDataResult<Video>();
+            var expectedMessage = "Video fetched.";
             var expectedStatusCode = HttpStatusCode.OK;
             var expectedVideoExtension = "mp4";
 
             var response = await _client.GetAsync(videoUri);
 
             var actualResultJson = await response.Content.ReadAsStringAsync();
-            var actualResult = JsonConvert.DeserializeObject<SuccessDataResult<Video>>(actualResultJson);
+            var actualResult = JsonConvert.DeserializeObject<DataResult<Video>>(actualResultJson);
             var actualStatusCode = response.StatusCode;
 
             Assert.True(actualResult!=null);
             Assert.True(actualResult.Data!=null);
             Assert.True(actualResult.Success);
             Assert.Equal(expectedStatusCode,actualStatusCode);
-            Assert.Equal(expectedResult.GetType(),actualResult.GetType());
+            Assert.Equal(expectedMessage,actualResult.Message);
             Assert.Equal(expectedVideoExtension,actualResult.Data.Extension);
+        }
+        [Theory]
+        [InlineData("videos/getbyid?videoid=")]
+        public async void Get_WithEmptyId_ShouldReturnErrorDataResultWithoutData(string videoUri)
+        {
+            var expectedStatusCode = HttpStatusCode.BadRequest;
+
+            var response = await _client.GetAsync(videoUri);
+
+            var actualResultJson = await response.Content.ReadAsStringAsync();
+            var actualResult = JsonConvert.DeserializeObject<DataResult<Video>>(actualResultJson);
+            var actualStatusCode = response.StatusCode;
+
+            Assert.True(actualResult != null);
+            Assert.True(actualResult.Data == null);
+            Assert.True(!actualResult.Success);
+            Assert.Equal(expectedStatusCode, actualStatusCode);
         }
 
         [Theory]
         [InlineData("videos/delete")]
         public async void Delete_WithValidData_ShouldReturnSuccessResult(string videoUri)
         {
-            var expectedResult = new SuccessResult("Video deleted.");
+            var expectedMessage = "Video deleted.";
             var expectedStatusCode = HttpStatusCode.OK;
             var request = new Video
             {
@@ -113,20 +406,19 @@ namespace WebApi.IntegrationTests.Controllers
 
             var actualStatusCode = response.StatusCode;
             var actualResultJson = await response.Content.ReadAsStringAsync();
-            var actualResult = JsonConvert.DeserializeObject<SuccessResult>(actualResultJson);
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
 
             Assert.True(actualResult!=null);
             Assert.True(actualResult.Success);
             Assert.Equal(expectedStatusCode,actualStatusCode);
-            Assert.Equal(expectedResult.GetType(),actualResult.GetType());
-            Assert.Equal(expectedResult.Message,actualResult.Message);
+            Assert.Equal(expectedMessage,actualResult.Message);
         }
 
         [Theory]
         [InlineData("videos/update")]
         public async void Update_WithValidData_ShouldReturnSuccessDataResult(string videoUri)
         {
-            var expectedResult = new SuccessResult("Video updated.");
+            var expectedMessage = "Video updated.";
             var expectedStatusCode = HttpStatusCode.OK;
             var request = new Video
             {
@@ -142,13 +434,12 @@ namespace WebApi.IntegrationTests.Controllers
 
             var actualStatusCode = response.StatusCode;
             var actualResultJson = await response.Content.ReadAsStringAsync();
-            var actualResult = JsonConvert.DeserializeObject<SuccessResult>(actualResultJson);
+            var actualResult = JsonConvert.DeserializeObject<Result>(actualResultJson);
 
             Assert.True(actualResult!=null);
             Assert.True(actualResult.Success);
             Assert.Equal(expectedStatusCode,actualStatusCode);
-            Assert.Equal(expectedResult.GetType(),actualResult.GetType());
-            Assert.Equal(expectedResult.Message,actualResult.Message);
+            Assert.Equal(expectedMessage,actualResult.Message);
         }
 
     }
