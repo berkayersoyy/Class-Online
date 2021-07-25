@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using Business.Abstract;
 using Business.Constants;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Validation;
 using Core.DataAccess.Ftp;
 using Core.Utilities.Business;
 using Core.Utilities.Results;
@@ -30,7 +32,7 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<Video>(_videoDal.Get(v => v.Id == id), Messages.GetVideo);
         }
-
+        [ValidationAspect(typeof(VideoValidator))]
         public IResult Add(Video video)
         {
             _videoDal.Add(video);
