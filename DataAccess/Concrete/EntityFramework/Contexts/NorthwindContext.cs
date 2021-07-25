@@ -19,7 +19,7 @@ namespace DataAccess.Concrete.EntityFramework.Contexts
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=TrainerHome;Trusted_Connection=true");
+                optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=TrainerHome_Test;Trusted_Connection=true");
             }
         }
 
