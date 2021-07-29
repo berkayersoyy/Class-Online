@@ -25,7 +25,11 @@ namespace Business.DependencyResolvers.Autofac
             builder.RegisterType<VideoManager>().As<IVideoService>().SingleInstance();
 
             builder.RegisterType<FtpVideoDal>().As<IFtpVideoDal>().SingleInstance();
+            builder.RegisterType<VideoFtpManager>().As<IVideoFtpService>().SingleInstance();
 
+            builder.RegisterType<EfPlaylistDal>().As<IPlaylistDal>().SingleInstance();
+            builder.RegisterType<PlaylistManager>().As<IPlaylistService>().SingleInstance();
+            
             builder.RegisterType<AuthManager>().As<IAuthService>().SingleInstance();
             builder.RegisterType<JwtHelper>().As<ITokenHelper>().SingleInstance();
 

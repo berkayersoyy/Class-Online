@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using Business.Abstract;
+using Business.Constants;
 using Core.Utilities.Results;
 using Entities.Concrete;
 using Newtonsoft.Json;
@@ -14,11 +15,11 @@ using Xunit;
 
 namespace WebApi.IntegrationTests.Controllers
 {
-    public class VideosControllerIntegrationTests : IClassFixture<CustomWebApplicationFactoryWithInMemory<Startup>>
+    public class VideosControllerIntegrationTests : IClassFixture<CustomWebApplicationFactoryWithSql<Startup>>
     {
         private readonly HttpClient _client;
 
-        public VideosControllerIntegrationTests(CustomWebApplicationFactoryWithInMemory<Startup> factory)
+        public VideosControllerIntegrationTests(CustomWebApplicationFactoryWithSql<Startup> factory)
         {
             _client = factory.CreateClient();
             _client.BaseAddress = new Uri("https://localhost/api/");
@@ -27,7 +28,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithValidData_ShouldReturnSuccessResult(string videoUri)
         {
-            var expectedMessage = "Video added.";
+            var expectedMessage = Messages.VideoAdded;
             var expectedStatusCode = HttpStatusCode.OK;
             var request = new Video
             {
@@ -52,7 +53,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithEmptyTitle_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -77,7 +78,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithNullTitle_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -102,7 +103,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithEmptyDescription_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -127,7 +128,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithNullDescription_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -152,7 +153,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithDescriptionLengthShorterThan25_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -177,7 +178,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithDescriptionLengthLongerThan250_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -202,7 +203,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithTitleLengthShorterThan5_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -228,7 +229,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithEmptyExtension_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -253,7 +254,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithNullExtension_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -279,7 +280,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithEmptyPath_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -304,7 +305,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/add")]
         public async void Add_WithNullPath_ShouldReturnErrorResult(string videoUri)
         {
-            var expectedMessage = "Validation failed";
+            var expectedMessage = Messages.ValidationFailed;
             var expectedStatusCode = HttpStatusCode.BadRequest;
             var request = new Video
             {
@@ -330,7 +331,7 @@ namespace WebApi.IntegrationTests.Controllers
         public async void GetList_WithValidData_ShouldReturnSuccessDataResultWithData(string videoUri)
         {
             //TODO Get all videos for check expected video count!
-            var expectedMessage = "All videos fetched.";
+            var expectedMessage = Messages.GetVideos;
             var expectedStatusCode = HttpStatusCode.OK;
 
             var response = await _client.GetAsync(videoUri);
@@ -351,7 +352,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/getbyid?videoid=1")]
         public async void Get_WithValidId_ShouldReturnSuccessDataResultWithData(string videoUri)
         {
-            var expectedMessage = "Video fetched.";
+            var expectedMessage = Messages.GetVideo;
             var expectedStatusCode = HttpStatusCode.OK;
             var expectedVideoExtension = "mp4";
 
@@ -390,7 +391,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/delete")]
         public async void Delete_WithValidData_ShouldReturnSuccessResult(string videoUri)
         {
-            var expectedMessage = "Video deleted.";
+            var expectedMessage = Messages.VideoDeleted;
             var expectedStatusCode = HttpStatusCode.OK;
             var request = new Video
             {
@@ -418,7 +419,7 @@ namespace WebApi.IntegrationTests.Controllers
         [InlineData("videos/update")]
         public async void Update_WithValidData_ShouldReturnSuccessDataResult(string videoUri)
         {
-            var expectedMessage = "Video updated.";
+            var expectedMessage = Messages.VideoUpdated;
             var expectedStatusCode = HttpStatusCode.OK;
             var request = new Video
             {

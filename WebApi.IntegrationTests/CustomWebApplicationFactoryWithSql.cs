@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace WebApi.IntegrationTests
 {
-    public class CustomWebApplicationFactoryWithInMemory<TStartup> :BaseWebApplicationFactory<TStartup> where TStartup : class
+    public class CustomWebApplicationFactoryWithSql<TStartup> :BaseWebApplicationFactory<TStartup> where TStartup : class
     {
 
          protected override void ConfigureWebHost(IWebHostBuilder builder)
